@@ -24,5 +24,8 @@ func MkToolManagerDir(toolManagerDir string) (string, error) {
 	} else {
 		err = os.Mkdir(toolManagerDir, os.ModePerm)
 	}
+	if err != nil {
+		toolManagerDir = ""
+	}
 	return toolManagerDir, err
 }
