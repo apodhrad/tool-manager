@@ -61,3 +61,23 @@ func TableToString(tbl table.Table) string {
 	tbl.Print()
 	return tblBuf.String()
 }
+
+type Version struct {
+	Version string
+	Url     string
+}
+
+type Tool struct {
+	Name     string
+	Latest   string
+	Versions []Version
+}
+
+var tools map[string]Tool
+
+func ReadTools() {
+}
+
+func AddTool() {
+
+}

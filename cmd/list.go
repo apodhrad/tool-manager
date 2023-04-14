@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
@@ -35,10 +36,31 @@ func init() {
 }
 
 func listCmdRun(cmd *cobra.Command, args []string) {
-	table := NewTable("Name", "Version", "Installed")
-	table.AddRow("example", "1.2.1", "installed")
-	table.AddRow("example", "1.2.0", "")
-	table.AddRow("example", "1.1.0", "")
-	output := TableToString(table)
+	name, _ := cmd.Flags().GetString("name")
+	installed, _ := cmd.Flags().GetBool("installed")
+
+	tools := getTools(name, installed)
+	tbl := getTable(tools)
+	output := TableToString(tbl)
 	fmt.Println(output)
+}
+
+func getTools(name string, installed bool) map[string]Tool {
+	tools := make(map[string]Tool)
+	example := Tool{
+		Name:     "example",
+		Versions: []Version{{Version: "1.2.1"}, {Version: "1.2.0"}, {Version: "1.1.0"}},
+	}
+	tools["example"] = example
+	return tools
+}
+
+func getTable(tools map[string]Tool) table.Table {
+	tbl := NewTable("Name", "Version", "Installed")
+	for name, tool := range tools {
+		for _, version := range tool.Versions {
+			tbl.AddRow(name, version.Version, "")
+		}
+	}
+	return tbl
 }
