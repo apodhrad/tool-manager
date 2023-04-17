@@ -1,0 +1,12 @@
+- name: toolA
+  releases:
+    - version: 1.1.0
+      url: http://localhost/toolA/1.1.0/toolA
+    - version: 1.0.0
+      url: http://localhost/toolA/1.0.0/toolA
+- name: toolB
+  releases:
+    - version: 2.0.1
+      url: http://localhost/toolB/2.0.1/toolB
+    - version: 2.0.0
+      url: http://localhost/toolB/2.0.0/toolB

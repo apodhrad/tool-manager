@@ -4,8 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
+	"os"
 	"os/exec"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Release struct {
@@ -74,4 +78,24 @@ func CleanTools() {
 
 func GetTools(name string, installed bool) map[string]Tool {
 	return tools
+}
+
+func LoadToolsFromYamlFile(file string) error {
+	var tools []Tool
+
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return errors.Join(fmt.Errorf("Cannot read yaml file '%s'", file), err)
+	}
+
+	err = yaml.Unmarshal(data, &tools)
+	if err != nil {
+		return errors.Join(fmt.Errorf("Cannot unmarshal yaml file '%s'", file), err)
+	}
+
+	for _, tool := range tools {
+		AddTool(tool)
+	}
+
+	return err
 }

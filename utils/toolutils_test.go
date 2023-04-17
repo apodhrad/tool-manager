@@ -85,3 +85,80 @@ func TestGettingInstalledVersionError(t *testing.T) {
 	assert.Empty(t, version)
 	assert.Equal(t, "exec: \"foo\": executable file not found in $PATH", err.Error())
 }
+
+func TestLoadingToolsFromYamlFile(t *testing.T) {
+	setup()
+
+	toolA := Tool{
+		Name: "toolA",
+		Releases: []Release{
+			{Version: "1.1.0", Url: "http://localhost/toolA/1.1.0/toolA"},
+			{Version: "1.0.0", Url: "http://localhost/toolA/1.0.0/toolA"},
+		},
+	}
+
+	toolA2 := Tool{
+		Name: "toolA",
+		Releases: []Release{
+			{Version: "1.1.0", Url: "http://localhost/toolA/1.1.0/toolA"},
+			{Version: "1.0.0", Url: "http://localhost/toolA/1.0.0/toolA"},
+			{Version: "1.1.1", Url: "http://localhost/toolA/1.1.1/toolA"},
+		},
+	}
+
+	toolB := Tool{
+		Name: "toolB",
+		Releases: []Release{
+			{Version: "2.0.1", Url: "http://localhost/toolB/2.0.1/toolB"},
+			{Version: "2.0.0", Url: "http://localhost/toolB/2.0.0/toolB"},
+		},
+	}
+
+	toolC := Tool{
+		Name: "toolC",
+		Releases: []Release{
+			{Version: "3.1.1", Url: "http://localhost/toolC/3.1.1/toolC"},
+			{Version: "2.0.0", Url: "http://localhost/toolC/2.0.0/toolC"},
+		},
+	}
+
+	err := LoadToolsFromYamlFile("test-resources/toolset_1.yaml")
+	assert.Nil(t, err)
+	tools := GetTools("", false)
+	assert.NotNil(t, tools)
+	assert.Equal(t, 2, len(tools))
+	assert.Equal(t, toolA, tools["toolA"])
+	assert.Equal(t, toolB, tools["toolB"])
+
+	err = LoadToolsFromYamlFile("test-resources/toolset_2.yaml")
+	assert.Nil(t, err)
+	tools = GetTools("", false)
+	assert.NotNil(t, tools)
+	assert.Equal(t, 3, len(tools))
+	assert.Equal(t, toolA2, tools["toolA"])
+	assert.Equal(t, toolB, tools["toolB"])
+	assert.Equal(t, toolC, tools["toolC"])
+
+	teardown()
+}
+
+func TestLoadingInvalidYamlFile(t *testing.T) {
+	setup()
+
+	err := LoadToolsFromYamlFile("test-resources/invalid_toolset_1.yaml")
+	assert.NotNil(t, err)
+	tools := GetTools("", false)
+	assert.Equal(t, 0, len(tools))
+
+	teardown()
+}
+func TestLoadingNonexistingYamlFile(t *testing.T) {
+	setup()
+
+	err := LoadToolsFromYamlFile("test-resources/toolset_0.yaml")
+	assert.NotNil(t, err)
+	tools := GetTools("", false)
+	assert.Equal(t, 0, len(tools))
+
+	teardown()
+}

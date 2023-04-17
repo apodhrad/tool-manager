@@ -1,0 +1,6 @@
+name: toolA
+  releases:
+    - version: 1.1.0
+      url: http://localhost/toolA/1.1.0/toolA
+    - version: 1.0.0
+      url: http://localhost/toolA/1.0.0/toolA
