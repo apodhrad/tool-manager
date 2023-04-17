@@ -9,34 +9,44 @@ import (
 	"strings"
 )
 
+const TOOL_MANAGER_HOME_ENV_KEY = "TOOL_MANAGER_HOME"
 const DEFAULT_TOOL_MANAGER_DIR string = ".tool-manager"
 
-func ToolManagerMkDir(toolManagerDir string) (string, error) {
-	if toolManagerDir == "" {
+func SetToolManagerHome(dir string) {
+	os.Setenv(TOOL_MANAGER_HOME_ENV_KEY, dir)
+}
+
+func UnsetToolManagerHome() {
+	os.Unsetenv(TOOL_MANAGER_HOME_ENV_KEY)
+}
+
+func ToolManagerMkDir() (string, error) {
+	toolManagerHome := os.Getenv(TOOL_MANAGER_HOME_ENV_KEY)
+	if toolManagerHome == "" {
 		userHomeDir, _ := os.UserHomeDir()
-		toolManagerDir = filepath.Join(userHomeDir, DEFAULT_TOOL_MANAGER_DIR)
+		toolManagerHome = filepath.Join(userHomeDir, DEFAULT_TOOL_MANAGER_DIR)
 	}
-	fileinfo, err := os.Stat(toolManagerDir)
+	fileinfo, err := os.Stat(toolManagerHome)
 	if !os.IsNotExist(err) {
 		if !fileinfo.IsDir() {
-			err = errors.New(fmt.Sprintf("'%s' is a file!", toolManagerDir))
+			err = errors.New(fmt.Sprintf("'%s' is a file!", toolManagerHome))
 		} else {
 			err = nil
 		}
 	} else {
-		err = os.Mkdir(toolManagerDir, os.ModePerm)
+		err = os.Mkdir(toolManagerHome, os.ModePerm)
 	}
 	if err != nil {
-		toolManagerDir = ""
+		toolManagerHome = ""
 	}
-	return toolManagerDir, err
+	return toolManagerHome, err
 }
 
-func ToolManagerLoadTools(dir string) error {
+func ToolManagerLoadTools() error {
 	CleanTools()
-	toolManagerDir, err := ToolManagerMkDir(dir)
+	toolManagerDir, err := ToolManagerMkDir()
 	if err == nil {
-		filepath.Walk(toolManagerDir, func(path string, info fs.FileInfo, err error) error {
+		err = filepath.Walk(toolManagerDir, func(path string, info fs.FileInfo, err error) error {
 			if err == nil && strings.HasSuffix(path, ".yaml") {
 				err = LoadToolsFromYamlFile(path)
 			}

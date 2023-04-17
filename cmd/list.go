@@ -19,6 +19,10 @@ The output will also specify if and which version is installed.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name, _ := cmd.Flags().GetString("name")
 		installed, _ := cmd.Flags().GetBool("installed")
+		err := utils.ToolManagerLoadTools()
+		if err != nil {
+			return err
+		}
 		tools := utils.GetTools(name, installed)
 		output := ToolsToString(tools)
 		fmt.Println(output)
