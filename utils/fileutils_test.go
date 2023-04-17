@@ -12,18 +12,18 @@ func TestDefaultToolManagerDir(t *testing.T) {
 	assert.Equal(t, ".tool-manager", DEFAULT_TOOL_MANAGER_DIR)
 }
 
-func TestMkToolManagerDir(t *testing.T) {
+func TestToolManagerMkDir(t *testing.T) {
 	tempDir := t.TempDir()
-	toolManagerDir, err := MkToolManagerDir(tempDir)
+	toolManagerDir, err := ToolManagerMkDir(tempDir)
 	assert.Nil(t, err)
 	assert.Equal(t, tempDir, toolManagerDir)
 }
-func TestMkToolManagerDirDefault(t *testing.T) {
+func TestToolManagerMkDirDefault(t *testing.T) {
 	tempDir := t.TempDir()
 	oldHome := os.Getenv("HOME")
 	os.Setenv("HOME", tempDir)
 
-	toolManagerDir, err := MkToolManagerDir("")
+	toolManagerDir, err := ToolManagerMkDir("")
 
 	os.Setenv("HOME", oldHome)
 
@@ -32,19 +32,26 @@ func TestMkToolManagerDirDefault(t *testing.T) {
 	assert.DirExists(t, toolManagerDir)
 	assert.Equal(t, oldHome, os.Getenv("HOME"))
 }
-func TestMkToolManagerDirNonexistent(t *testing.T) {
+func TestToolManagerMkDirNonexistent(t *testing.T) {
 	tempDir := t.TempDir()
 	os.Remove(tempDir)
-	toolManagerDir, err := MkToolManagerDir(tempDir)
+	toolManagerDir, err := ToolManagerMkDir(tempDir)
 	assert.Nil(t, err)
 	assert.Equal(t, tempDir, toolManagerDir)
 	assert.DirExists(t, tempDir)
 }
-func TestMkToolManagerDirError(t *testing.T) {
+func TestToolManagerMkDirError(t *testing.T) {
 	tempDir := t.TempDir()
 	tempFilePath := filepath.Join(tempDir, "tool-manager")
 	os.Create(tempFilePath)
-	toolManagerDir, err := MkToolManagerDir(tempFilePath)
+	toolManagerDir, err := ToolManagerMkDir(tempFilePath)
 	assert.NotNil(t, err)
 	assert.Empty(t, toolManagerDir)
+}
+
+func TestToolManagerLoadTools(t *testing.T) {
+	err := ToolManagerLoadTools("test-resources/tool-manager")
+	assert.Nil(t, err)
+	tools := GetTools("", false)
+	assert.Equal(t, 3, len(tools))
 }

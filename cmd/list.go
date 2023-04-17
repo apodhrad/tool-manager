@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/apodhrad/tool-manager/utils"
-	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +16,14 @@ var listCmd = &cobra.Command{
 	Short: "List available tools",
 	Long: `List all tools which can be managed by this manager.
 The output will also specify if and which version is installed.`,
-	Run: listCmdRun,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name, _ := cmd.Flags().GetString("name")
+		installed, _ := cmd.Flags().GetBool("installed")
+		tools := utils.GetTools(name, installed)
+		output := ToolsToString(tools)
+		fmt.Println(output)
+		return nil
+	},
 }
 
 func init() {
@@ -36,21 +42,13 @@ func init() {
 	listCmd.Flags().StringP("name", "n", "", "List only tools with a given name")
 }
 
-func listCmdRun(cmd *cobra.Command, args []string) {
-	name, _ := cmd.Flags().GetString("name")
-	installed, _ := cmd.Flags().GetBool("installed")
-	tools := utils.GetTools(name, installed)
-	tbl := getTable(tools)
-	output := TableToString(tbl)
-	fmt.Println(output)
-}
-
-func getTable(tools map[string]utils.Tool) table.Table {
-	tbl := NewTable("Name", "Version", "Installed")
+func ToolsToString(tools map[string]utils.Tool) string {
+	table := NewTable("Name", "Version", "Installed")
 	for name, tool := range tools {
 		for _, release := range tool.Releases {
-			tbl.AddRow(name, release.Version, "")
+			table.AddRow(name, release.Version, "")
 		}
 	}
-	return tbl
+	output := TableToString(table)
+	return output
 }

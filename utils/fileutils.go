@@ -3,13 +3,15 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const DEFAULT_TOOL_MANAGER_DIR string = ".tool-manager"
 
-func MkToolManagerDir(toolManagerDir string) (string, error) {
+func ToolManagerMkDir(toolManagerDir string) (string, error) {
 	if toolManagerDir == "" {
 		userHomeDir, _ := os.UserHomeDir()
 		toolManagerDir = filepath.Join(userHomeDir, DEFAULT_TOOL_MANAGER_DIR)
@@ -28,4 +30,18 @@ func MkToolManagerDir(toolManagerDir string) (string, error) {
 		toolManagerDir = ""
 	}
 	return toolManagerDir, err
+}
+
+func ToolManagerLoadTools(dir string) error {
+	CleanTools()
+	toolManagerDir, err := ToolManagerMkDir(dir)
+	if err == nil {
+		filepath.Walk(toolManagerDir, func(path string, info fs.FileInfo, err error) error {
+			if err == nil && strings.HasSuffix(path, ".yaml") {
+				err = LoadToolsFromYamlFile(path)
+			}
+			return err
+		})
+	}
+	return err
 }
